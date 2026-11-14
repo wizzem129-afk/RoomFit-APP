@@ -1,0 +1,19 @@
+# Xcode
+.DS_Store
+xcuserdata/
+*.xcworkspace
+DerivedData/
+build/
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.pbxuser
+*.xccheckout
+*.moved-builder
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# XcodeGen
+RoomFit.xcodeproj/
