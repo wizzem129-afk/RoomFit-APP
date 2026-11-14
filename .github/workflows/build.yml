@@ -2,14 +2,12 @@ name: Build iOS App
 
 on:
   push:
-    branches: [ main, master ]
   pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build RoomFit with XcodeGen
+    name: Build RoomFit for iOS Simulator
     runs-on: macos-15
 
     steps:
@@ -22,29 +20,32 @@ jobs:
       - name: Generate Xcode Project
         run: xcodegen generate
 
-      - name: Build, run and take screenshot
+      - name: Build RoomFit
         run: |
-          DEVICE=$(xcrun simctl list devices available | grep -E "iPhone 1[5-7]( Pro)? \(" | head -1 | grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}')
-          echo "Using simulator: $DEVICE"
-          xcrun simctl boot "$DEVICE"
           xcodebuild build \
             -project RoomFit.xcodeproj \
             -scheme RoomFit \
-            -destination "id=$DEVICE" \
+            -destination 'generic/platform=iOS Simulator' \
             -configuration Debug \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
-          APP=$(find build/Build/Products -maxdepth 3 -name "*.app" | head -1)
-          BUNDLE=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APP/Info.plist")
-          xcrun simctl install "$DEVICE" "$APP"
-          xcrun simctl launch "$DEVICE" "$BUNDLE"
-          sleep 8
-          mkdir -p screenshots
-          xcrun simctl io "$DEVICE" screenshot screenshots/home.png
 
-      - name: Upload screenshots
+      - name: Prepare App for Appetize
+        run: |
+          APP="build/Build/Products/Debug-iphonesimulator/RoomFit.app"
+
+          if [ ! -d "$APP" ]; then
+            echo "Error: RoomFit.app was not found!"
+            exit 1
+          fi
+
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$APP" RoomFit-iOS-Simulator.zip
+
+      - name: Upload RoomFit App
         uses: actions/upload-artifact@v4
         with:
-          name: screenshots
-          path: screenshots
+          name: RoomFit-iOS-Simulator
+          path: RoomFit-iOS-Simulator.zip
+          retention-days: 7
