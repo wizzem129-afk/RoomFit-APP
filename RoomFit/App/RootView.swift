@@ -32,9 +32,7 @@ struct RootView: View {
         Group {
             switch currentScreen {
             case .home:
-                HomeView(onProductSelected: { _ in
-                    currentScreen = .product
-                })
+                HomeView()
             case .product:
                 ProductView(onBack: {
                     currentScreen = .home

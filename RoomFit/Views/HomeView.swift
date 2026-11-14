@@ -1,7 +1,11 @@
 import SwiftUI
 
 struct HomeView: View {
-    var onProductSelected: (Product) -> Void = { _ in }
+    var onProductSelected: (Product) -> Void
+
+    init(onProductSelected: @escaping (Product) -> Void = { _ in }) {
+        self.onProductSelected = onProductSelected
+    }
     
     @State private var searchText: String = ""
     @State private var selectedCategory: String = "All"
