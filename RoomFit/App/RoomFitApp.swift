@@ -4,8 +4,7 @@ import SwiftUI
 struct RoomFitApp: App {
     var body: some Scene {
         WindowGroup {
-            HomeView()
-                .preferredColorScheme(.light)
+            RootView()
         }
     }
 }

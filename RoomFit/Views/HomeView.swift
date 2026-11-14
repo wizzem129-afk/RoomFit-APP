@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct HomeView: View {
+    var onProductSelected: (Product) -> Void = { _ in }
+    
     @State private var searchText: String = ""
     @State private var selectedCategory: String = "All"
     @State private var selectedTab: TabItem = .home
@@ -79,9 +81,12 @@ struct HomeView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 14) {
                             ForEach(sampleProducts) { product in
-                                ProductCard(product: product) {
-                                    // Product tapped
+                                Button {
+                                    onProductSelected(product)
+                                } label: {
+                                    ProductCard(product: product)
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
                         .padding(.horizontal, 20)
