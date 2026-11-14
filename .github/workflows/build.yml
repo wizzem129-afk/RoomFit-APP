@@ -22,12 +22,29 @@ jobs:
       - name: Generate Xcode Project
         run: xcodegen generate
 
-      - name: Build for iOS Simulator
+      - name: Build, run and take screenshot
         run: |
-          xcodebuild clean build \
+          DEVICE=$(xcrun simctl list devices available | grep -E "iPhone 1[5-7]( Pro)? \(" | head -1 | grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}')
+          echo "Using simulator: $DEVICE"
+          xcrun simctl boot "$DEVICE"
+          xcodebuild build \
             -project RoomFit.xcodeproj \
             -scheme RoomFit \
-            -destination "generic/platform=iOS Simulator" \
+            -destination "id=$DEVICE" \
             -configuration Debug \
+            -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
+          APP=$(find build/Build/Products -maxdepth 3 -name "*.app" | head -1)
+          BUNDLE=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APP/Info.plist")
+          xcrun simctl install "$DEVICE" "$APP"
+          xcrun simctl launch "$DEVICE" "$BUNDLE"
+          sleep 8
+          mkdir -p screenshots
+          xcrun simctl io "$DEVICE" screenshot screenshots/home.png
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots
