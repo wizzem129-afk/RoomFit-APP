@@ -10,9 +10,6 @@ struct ProductCard: View {
                 // Product Image Container with Floating "AR" Badge
                 ZStack(alignment: .topTrailing) {
                     productImageView
-                        .frame(width: 130, height: 115)
-                        .background(Color(hex: 0xF2ECE4))
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     
                     if product.hasARBadge {
                         Text("AR")
@@ -53,11 +50,19 @@ struct ProductCard: View {
     @ViewBuilder
     private var productImageView: some View {
         if UIImage(named: product.imageName) != nil {
-            Image(product.imageName)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 130, height: 115)
-                .clipped()
+            ZStack {
+                Color(hex: 0xF2ECE4)
+                
+                Image(product.imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .scaleEffect(imageScale(for: product.imageName))
+                    .offset(imageOffset(for: product.imageName))
+                    .frame(width: 130, height: 115)
+            }
+            .frame(width: 130, height: 115)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         } else {
             // Contextual fallback icon matching product category
             ZStack {
@@ -67,6 +72,41 @@ struct ProductCard: View {
                     .font(.system(size: 42))
                     .foregroundColor(iconColor(for: product.category))
             }
+            .frame(width: 130, height: 115)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+    }
+    
+    // MARK: - Framing Helpers for Custom Crops
+    private func imageScale(for imageName: String) -> CGFloat {
+        switch imageName {
+        case "product_arc":
+            // Scale slightly so both the shade at the top and the stand at the bottom fit inside the 115pt height
+            return 0.88
+        case "product_forma":
+            // Keep table prominent and centered
+            return 1.08
+        case "product_alba":
+            // Center the armchair from the temporary hero_chair image
+            return 1.35
+        default:
+            return 1.0
+        }
+    }
+    
+    private func imageOffset(for imageName: String) -> CGSize {
+        switch imageName {
+        case "product_arc":
+            // Shift right to bring the lamp (on the left of the scene) into the center of the frame
+            return CGSize(width: 32, height: 0)
+        case "product_forma":
+            // Align slightly down so the table, vase, and rug surface are fully visible
+            return CGSize(width: 0, height: -10)
+        case "product_alba":
+            // Center the armchair from the temporary hero_chair image
+            return CGSize(width: -28, height: -38)
+        default:
+            return .zero
         }
     }
     
